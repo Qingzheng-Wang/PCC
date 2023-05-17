@@ -1,9 +1,3 @@
-"""
-语法分析:使用递归的自上而下方式
-作者：刘金明
-博客：me.idealli.com
-Github：github.com/flymysql
-"""
 import sys, os, re
 sys.path.append(os.pardir)
 from lexer import word_list,k_list

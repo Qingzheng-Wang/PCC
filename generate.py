@@ -264,7 +264,7 @@ def creat_mcode(filename):
     root = analysis(word_table)[1]
     view_astree(root)
 
-    return {"name_list":w_list.name_list, "mid_code":mid_result, "tmp":tmp, "strings":string_list, "arrs":arr}
+    return {"name_list":w_list.para_list, "mid_code":mid_result, "tmp":tmp, "strings":string_list, "arrs":arr}
         
 if __name__ == "__main__":
     filename = 'test/test.c'

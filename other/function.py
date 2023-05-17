@@ -1,7 +1,5 @@
-# 环境：python3.6
-# 编译原理——词法分析器
-# 刘金明——320160939811
 import re
+import tabulate
 
 # 运算符表
 y_list = {"+","-","*","/","<","<=",">",">=","=","==","!=","^",",","&","&&","|","||","%","~","<<",">>","!"}
@@ -18,14 +16,15 @@ Cmp = ["<", ">", "==", "!=", "<=", ">="]
 
 # 正则表达式判断是否为数字
 def if_num(int_word):
-    if re.match("^([0-9]{1,}[.][0-9]*)$",int_word) or re.match("^([0-9]{1,})$",int_word) == None:
+    # 前半部分代表和类似3.14这样的小数匹配，后半部分代表和整数匹配
+    if re.match("^([0-9]+[.][0-9]*)$", int_word) or re.match("^([0-9]+)$", int_word) is None:
         return False
     else:
         return True
 
 # 判断是否为为变量名
-def if_name(int_word):
-    if re.match("[a-zA-Z_][a-zA-Z0-9_]*",int_word) == None:
+def if_para(int_word):
+    if re.match("[a-zA-Z_][a-zA-Z0-9_]*", int_word) is None: # 表示支持aSb, Abb__, 以及_aaB8__诸如此类的变量名
         return False
     else:
         return True
@@ -35,16 +34,32 @@ def if_name(int_word):
 #     if 
 
 # 判断变量名是否已存在
-def have_name(name_list,name):
-    for n in name_list:
-        if name == n['name']:
+def have_para(para_list, para):
+    for n in para_list:
+        if para == n['para']:
             return True
     return False
 
 # list的换行输出
-def printf(lists):
+def print_str(lists):
+    table = [['line', 'type', 'word', 'id']]
     for l in lists:
-        print(l)
+        if len(l.items()) == 4:
+            temp = [i[1] for i in l.items()]
+            table.append(temp)
+        else:
+            t = list(l.items())
+            temp = [i[1] for i in t]
+            temp.append("None")
+            table.append(temp)
+    print(tabulate.tabulate(table, headers='firstrow'))
+
+def print_para(lists):
+    table = [['line', 'id', 'value', 'para', 'flag']]
+    for l in lists:
+        temp = [i[1] for i in l.items()]
+        table.append(temp)
+    print(tabulate.tabulate(table, headers='firstrow'))
 
 # 分割并获取文本单词
 # 返回值为列表out_words
