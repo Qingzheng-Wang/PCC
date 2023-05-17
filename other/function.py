@@ -2,9 +2,9 @@ import re
 import tabulate
 
 # 运算符表
-y_list = {"+","-","*","/","<","<=",">",">=","=","==","!=","^",",","&","&&","|","||","%","~","<<",">>","!"}
+op_list = {"+", "-", "*", "/", "<", "<=", ">", ">=", "=", "==", "!=", "^", ",", "&", "&&", "|", "||", "%", "~", "<<", ">>", "!"}
 # 分隔符表
-f_list = {";","(",")","[","]","{","}", ".",":","\"","#","\'","\\","?"}
+sp_list = {";", "(", ")", "[", "]", "{", "}", ".", ":", "\"", "#", "\'", "\\", "?"}
 # 关键字表
 k_list = {
     "auto", "break", "case", "char", "const", "continue","default", "do", "double", "else", "enum", "extern",
@@ -65,7 +65,7 @@ def print_para(lists):
 # 返回值为列表out_words
 # 列表元素{'word':ws, 'line':line_num}分别对应单词与所在行号
 def get_word(filename):
-    global f_list
+    global sp_list
     out_words = []
     f = open(filename,'r+',encoding='UTF-8')
     # 先逐行读取，并记录行号
@@ -91,10 +91,10 @@ def get_word(filename):
                 continue
             ws = w
             for a in w:
-                if a in f_list or a in y_list:
-                    # index为分隔符的位置，将被分隔符或运算符隔开的单词提取
+                if a in sp_list or a in op_list:
+                    # index为分隔符的位置，将被分隔符或运算符隔开的单词提取, 考虑例如main(){由多种类型组合的情况
                     index = ws.find(a)
-                    if index!=0:
+                    if index != 0: # 分隔符不在行首
                         # 存储单词与该单词的所在行号，方便报错定位
                         out_words.append({'word':ws[0:index], 'line':line_num})
                     ws = ws[index+1:]

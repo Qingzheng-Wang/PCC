@@ -1,26 +1,21 @@
-"""
-使用非递归的预测分析表做语法分析————预测分析表的生成
-作者：刘金明
-博客：me.idealli.com
-Github：github.com/flymysql
-"""
 import sys, os, re
 sys.path.append(os.pardir)
 from lexer import word_list,k_list
 
 grammars = {
     "Program":["type M C Pro"],
+
     "C":["( cc )"],
     "cc":["null"],
 
-    "Pro":["{ Pr }"],
+    "Pro":["{ Pr }"], # 大括号
     "Pr":["P Pr", "null"],
     "P":["type L ;", "L ;", "printf OUT ;", "Pan"],
 
-    "L":["M LM"],
+    "L":["M LM"], # 赋值语句
     "LM":["= FE", "Size AM","null"],
-    "FE":["E", "TEXT", "CHAR"],
-    "M":["name"],
+    "FE":["E", "string", "character"],
+    "M":["parameter"],
 
     "E":["T ET"],
     "ET":["+ T ET", "- T ET", "null"],
@@ -31,7 +26,7 @@ grammars = {
     "BRA": ["( E )"],
 
     "OUT":["( TXT V )"],
-    "TXT":['TEXT'],
+    "TXT":['string'],
     "V":[", E VV", "null"],
     "VV":[", E VV", "null"],
 
