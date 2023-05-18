@@ -1,3 +1,4 @@
+# 使用自上而下的语法分析
 import sys, os, re
 sys.path.append(os.pardir)
 from lexer import word_list,k_list
@@ -43,27 +44,29 @@ grammars = {
 first_table = {}
 follow_table = {}
 predict_table = {}
-observer = {}
+observer = {} # observer里面，key是产生式左部，value是产生式右部的最后一位，follow(key)更新，则follow(value)也要同步更新
 
 """
 初始化订阅者
 订阅者： 用于求follow集合的过程中特殊情况：
     非终结符的后继非终结符的first集合可能存在null
-    eg： A -> BC     C -> D | null   D -> (A) | i
-    那么在一次遍历过程中，因为C的first集合存在null，所以需要将follow（A）加入follow（B）
+    eg： A -> B C     C -> D | null   D -> (A) | i
+    那么在一次遍历过程中，需要将follow（A）加入follow（B），因为C -> null
     （重点）但是！此时的follow（A），并不是完整的，它可能在后续的遍历中会继续更新自身的follow集合
     所以此时会出现遗漏的follow
     所以我在这里用到一个订阅者模式
     订阅者为一个字典，字典键值为产生式左部，字典内容为产生式右部
 """
 def init_observer():
-    for k in grammars:
+    for k in grammars: # k是grammar里的键值，也就是产生式的左部
         follow_table[k] = []
         observer[k] = []
-        for next_grammar in grammars[k]:
+        for next_grammar in grammars[k]: # next_grammar是产生式的右部
             last_k = next_grammar.split()[-1]
             if last_k in grammars and last_k != k:
-                observer[k].append(last_k) 
+                observer[k].append(last_k)
+
+
 """
 刷新订阅
 检测到某个follow集合更新时，对其订阅的所有产生式左部的follow集合进行更新
@@ -72,9 +75,9 @@ def init_observer():
 """
 def refresh(k):
     for lk in observer[k]:
-        newlk = U(follow_table[k], follow_table[lk])
-        if newlk != follow_table[lk]:
-            follow_table[lk] = newlk
+        new = U(follow_table[k], follow_table[lk]) # k是左部，lk是右部最后一位
+        if new != follow_table[lk]:
+            follow_table[lk] = new
             refresh(lk)
 
 """
@@ -87,20 +90,20 @@ def U(A,B):
 查找指定非终结符的first集合
 """
 def find_first(key):
-    if key not in grammars:
+    if key not in grammars: # key不是grammar的左部，说明key是非终结符，递归结束，直接返回key
         return [key]
     l = []
     for next_grammar in grammars[key]: 
         next_k = next_grammar.split()[0]
-        l.extend(find_first(next_k))
+        l.extend(find_first(next_k)) # 递归调用，寻找右式第一个终结符或非终结符的first集
     return l
 
 """
-查找所有非终结符follow
+查找所有非终结符follow集合
 """
 def find_follow():
     init_observer()
-    follow_table["Program"] = ["#"]
+    follow_table["Program"] = ["#"] # Program作为入口非终结符
     for k in grammars:
         for next_grammar in grammars[k]:
             next_k = next_grammar.split()
@@ -109,10 +112,10 @@ def find_follow():
                 if next_k[i] in grammars:
                     if next_k[i+1] not in grammars:
                         """
-                        如果后继字符不是终结符，加入
+                        如果后继字符是终结符，加入follow集
                         """
                         new_follow = U([next_k[i+1]], follow_table[next_k[i]])
-                        if new_follow != follow_table[next_k[i]]:
+                        if new_follow != follow_table[next_k[i]]: # 判断new_follow是否较原来有更新
                             follow_table[next_k[i]] = new_follow
                             refresh(next_k[i])
                     else:
@@ -151,7 +154,7 @@ def get_first_table():
             next_k = next_grammar.split()[0]
             kl = find_first(next_k)
             first_table[k].extend(kl)
-            for kk in kl:
+            for kk in kl: # first集中有的非终结符，如果不为空，则直接加入预测表
                 if kk != "null":
                     predict_table[k][kk] = next_grammar
 

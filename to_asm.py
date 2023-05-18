@@ -1,8 +1,5 @@
 """
 中间代码转汇编代码
-作者：刘金明
-博客：me.idealli.com
-Github：github.com/flymysql
 """
 from generate import creat_mcode
 from other.function import if_num
