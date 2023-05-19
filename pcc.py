@@ -1,13 +1,7 @@
-"""
-PCC编译器入口函数
-作者：刘金明
-博客：me.idealli.com
-Github：github.com/flymysql
-"""
 from to_asm import to_asm
 from generate import creat_mcode
 from get_predict_table import grammars
-from LR import analysis
+from LL import analysis
 import os
 from lexer import word_list
 

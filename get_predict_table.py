@@ -170,7 +170,7 @@ def get_predict_table():
                     predict_table[k][fk] = next_grammar
 
 
-def creat_predict_table():
+def create_predict_table():
     get_first_table()
     find_follow()
     get_predict_table()

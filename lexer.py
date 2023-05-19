@@ -79,19 +79,19 @@ class word_list():
                 continue
             # 判断为关键字
             if w in k_list:
-                self.key_word_table.append({'line':line, 'type':'keyword', 'word':w})
-                self.word_list.append({'line':line, 'type':'keyword', 'word':w})
+                self.key_word_table.append({'line':line, 'type':w, 'word':w})
+                self.word_list.append({'line':line, 'type':w, 'word':w})
             elif w in Cmp:
-                self.word_list.append({'line':line, 'type':"comparator", 'word':w})
-            # 判断为关键字
+                self.word_list.append({'line':line, 'type':'Cmp', 'word':w})
+            # 判断为参数
             elif w in Type:
                 type_flag = w
                 self.key_word_table.append({'line':line, 'type':'type', 'word':w})
                 self.word_list.append({'line':line, 'type':'type', 'word':w})
             # 判断为运算符
             elif w in op_list:
-                self.operator_list.append({'line':line, 'type':'operator', 'word':w})
-                self.word_list.append({'line':line, 'type':'operator', 'word':w})
+                self.operator_list.append({'line':line, 'type':w, 'word':w})
+                self.word_list.append({'line':line, 'type':w, 'word':w})
             # 判断为分隔符
             elif w in sp_list:
                 if w in kuo_cp.values() or w in kuo_cp.keys(): # key是左括号，value是右括号
@@ -105,8 +105,8 @@ class word_list():
                         print("Error in line " + str(line) + ": missing bracket.")
                         self.flag = False
                         return
-                self.separator_list.append({'line':line, 'type':'separator', 'word':w})
-                self.word_list.append({'line':line, 'type':'separator', 'word':w})
+                self.separator_list.append({'line':line, 'type':w, 'word':w})
+                self.word_list.append({'line':line, 'type':w, 'word':w}) # 这里type必须用w，而不是' separator '，因为后续LL分析时要用w
             # 其他字符处理
             else:
                 if if_num(w):

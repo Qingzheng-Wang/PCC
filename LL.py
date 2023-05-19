@@ -1,8 +1,7 @@
-from get_predict_table import creat_predict_table
-import re
+from get_predict_table import create_predict_table
 from lexer import word_list
 
-predict_table = creat_predict_table()
+predict_table = create_predict_table()
 
 # 语法树节点
 class Node:
@@ -12,11 +11,12 @@ class Node:
         self.child = list()
     # 将语法树对象字符化输出
     def __str__(self):
-        childs = list()
+        children = list()
         for child in self.child:
-            childs.append(child.__str__())
+            children.append(child.__str__())
+        # 对于非终结符，type就是非终结符本身
         out = "<{type}, {text}>".format(type=self.type, text=self.text)
-        for child in childs:
+        for child in children:
             if child:
                 for line in child.split("\n"):
                     out = out + "\n     " + line
@@ -48,25 +48,26 @@ def analysis(word_table, show=False):
     """
     while len(stack) != 0:
         cur = stack.pop()
-        # 状态 1
+        # 状态 1 遇到结束符号，解析完成
         if cur.type == "#" and len(stack) == 0:
-            print("分析完成!")
+            print("\nComplete LL(1) analysis!")
             return [True, root]
-        # 状态 2
+        # 状态 2 遇到终结符，匹配
+        # 匹配终结符需要判断type而不是word，因为产生式中都是id类似的形式，而匹配字符是具体的值
         elif cur.type == word_table[index]['type']:
             if show:
-                print("符号栈：", stack_text(stack), "\n匹配字符: ", word_table[index]['word'])
+                print("\nSymbol Stack: ", stack_text(stack), "\nMatching Character: ", word_table[index]['word'])
             cur.text = word_table[index]['word']
             index += 1
-        # 状态 3
+        # 状态 3  遇到非终结符，继续生成子节点
         else:
             w = word_table[index]['type']
-            if w in predict_table[cur.type]:
+            if w in predict_table[cur.type]: # 判断该非终结符是否在预测表中
                 if predict_table[cur.type][w] == "null":
                     continue
                 next_pr = predict_table[cur.type][w].split()
                 if show:
-                    print("\n符号栈：", stack_text(stack), "\n产生式: ", cur.type,"->", predict_table[cur.type][w])
+                    print("\nSymbol Stack: ", stack_text(stack), "\nProduction: ", cur.type,"->", predict_table[cur.type][w])
                 node_list = []
                 """
                 产生式右部符号入栈
@@ -82,7 +83,7 @@ def analysis(word_table, show=False):
                     stack.append(nl)
             # 状态 4 错误
             else:
-                print("error", stack, cur.type , word_table[index]['type'])
+                print("Error in", stack, cur.type , word_table[index]['type'])
                 return [False]
 
 if __name__ == "__main__":
@@ -90,8 +91,8 @@ if __name__ == "__main__":
     word_table = w_list.word_list
     root = analysis(word_table, True)
     if root[0]:
-        print("\n\n是否继续打印语法树？\t1.打印 \t2.任意键退出\tTip：运行generate.py输出中间代码（四元式）\n请输入")
+        print("\n\nInput 1 to print the grammar tree, or press any key to quit.")
         if input() == "1":
             print(root[1])
-            print("\n\n语法树打印完成！运行 genenrate.py 生成四元式\n\n")
+            print("\n\nComplete printing grammar tree!\n\n")
         # print(root[1])

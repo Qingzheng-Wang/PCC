@@ -1,6 +1,6 @@
 # from parser import Node,build_ast
 from other.function import if_num 
-from LR import analysis
+from LL import analysis
 import sys, os, re
 sys.path.append(os.pardir)
 from lexer import word_list
