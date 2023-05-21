@@ -1,5 +1,13 @@
-# from parser import Node,build_ast
-from other.function import if_num 
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- #
+# ========================================================
+# 名称:   generate.py
+# 作者:   Qingzheng WANG
+# 时间:   2023/5/21
+# 描述:   前序遍历语法树，生成四元式
+# ========================================================
+
+from util.function import if_num
 from LL import analysis
 import sys, os
 sys.path.append(os.pardir)
@@ -60,8 +68,8 @@ def view_astree(root, ft=None):
         math_op(root)
     elif root.type == "Pan": # "Pan"表示条件判断语句
         judge(root)
-    elif root.type == "OUT":
-        out(root)
+    # elif root.type == "OUT":
+    #     out(root)
     else: # 遇到其他非终结符则递归调用其子节点
         re = ""
         for c in root.child:
@@ -87,13 +95,13 @@ def math_op(root, ft=None):
     """
     if root.type == "L": # L -> M LM
         c1 = root.child[1] # c1是LM
-        if len(c1.child) == 1: # 此时c1.child是null LM -> null
+        if len(c1.child) == 1: # 此时c1.child是null LM -> null，说明此时是声明语句，例如int i;
             mid_result.append(MNode("=", 0, 0, math_op(root.child[0].child[0]))) # root.child[0].child[0]是parameter，此时是声明语句，不赋值
         elif c1.child[0].type == "=": # LM -> = FE，遇到等号，就可以判断这是一个简单赋值语句，先生成四元式，然后四元式里的内容再递归处理
             mid_result.append(MNode("=", math_op(c1), 0, math_op(root.child[0].child[0])))
-        else: # LM -> Size AM
+        else: # LM -> Size AM，说明是数组赋值或声明语句
             if len(c1.child[1].child) >1: # AM -> = E，该情况是数组赋值，类似s[1] = 1 + 2, 2
-                cc1 = c1.child[1] # E
+                cc1 = c1.child[1] # AM
                 mid_result.append(MNode("=", math_op(cc1), 0, math_op(root.child[0].child[0]) + "[]" + math_op(c1.child[0])))
             if math_op(root.child[0].child[0]) not in arr: # 将math_op(root.child[0].child[0])添加到数组表中
                 arr[math_op(root.child[0].child[0])] = [math_op(c1.child[0]), type_flag]
@@ -151,7 +159,7 @@ def math_op(root, ft=None):
         re = ""
         for c in root.child:
             cre = math_op(c)
-            if cre != None and cre not in "[]}{)(\"'":
+            if cre != None and cre not in "[]}{)(\"'": # 不返回分隔符
                 re = cre
         return re
 
@@ -176,8 +184,8 @@ def judge(root):
             对whilie语句进行代码块标记，方便跳转
             """
             cur = len(mid_result)
-            while_flag.append([True,cur])
-            mid_result.append(MNode("code_block", 0, 0, "W" + str(cur)))
+            while_flag.append([True,cur]) # cur标记while代码块开始的位置
+            mid_result.append(MNode("block", 0, 0, "W" + str(cur))) # 生成while代码块开始指令
     if root.type == "Pbc":
         """
         判断语句括号中的的两种情况
@@ -185,10 +193,12 @@ def judge(root):
         2. (E1 cmp E2)
         """
         Pm = root.child[1].child
+        block_begin = "begin" + str(len(mid_result) + 1) # 生成一个标识符标记代码块开始的位置
+        # 生成跳转指令（跳转到代码块开始的位置）
         if len(Pm) == 1: # 此时括号里面就是一个数，如果这个数等于1，就跳转到下一条指令，下一条指令即是if条件满足时执行的操作
-            mid_result.append(MNode("j=", 1, math_op(root.child[0]), "code" + str(len(mid_result) + 1)))
+            mid_result.append(MNode("j=", 1, math_op(root.child[0]), block_begin))
         else: # PM -> Cmp E 否则就递归计算两个参数
-            mid_result.append(MNode("j" + judge(Pm[0]), math_op(root.child[0]), math_op(Pm[1]), "code" + str(len(mid_result) + 1)))
+            mid_result.append(MNode("j" + judge(Pm[0]), math_op(root.child[0]), math_op(Pm[1]), block_begin))
         return
     if root.type == "Pro":
         """
@@ -198,19 +208,30 @@ def judge(root):
         {
             code
         }
-        while跳转->判断标记
-        结束标记
+        if跳转处理流程：
+            1. 生成一个标识符标记代码块开始的位置    
+            2. 生成跳转指令（跳转到代码块开始的位置）
+            3. 生成一个标识符标记代码块结束的位置    
+            4. 生成无条件跳转指令（跳转到代码块结束的位置） 
+            5. 生成代码块开始指令                 
+            6. 递归调用函数处理代码块            
+            7. 生成代码块结束指令              
+            (j<,i,10,begin3)中数字3表示这是第三条指令
+            (j,0,0,end3)中数字3则是沿用了begin的数字3，仅表示begin3和end3指向一个代码块的开始和结束位置
+        while跳转处理流程与if类似，区别在于在上述步骤6和7之间
+        增加生成跳转到while语句开始位置的指令
         """
         w = while_flag.pop()
-        code_block = len(mid_result)
-        code = "block" + str(code_block)
-        mid_result.append(MNode("j", 0, 0, code))
-        mid_result.append(MNode("code_block", 0, 0, "code" + str(code_block)))
-        view_astree(root)
+        block_no = len(mid_result)
+        block_begin = "begin" + str(len(mid_result))
+        block_end = "end" + str(len(mid_result)) # 生成一个标识符标记代码块结束的位置
+        mid_result.append(MNode("j", 0, 0, block_end)) # 生成无条件跳转指令（跳转到代码块结束的位置）
+        mid_result.append(MNode("block", 0, 0, block_begin)) # 生成代码块开始指令
+        view_astree(root) # 递归调用函数处理代码块
         if w[0] == True:
-            mid_result.append(MNode("j", 0, 0, "W" + str(w[1])))
-        mid_result.append(MNode("code_block", 0, 0, code))
-        code_block += 1
+            mid_result.append(MNode("j", 0, 0, "W" + str(w[1]))) # 生成跳转到while语句开始位置的指令
+        mid_result.append(MNode("block", 0, 0, block_end)) # 生成代码块结束指令
+        block_no += 1
         return
     else:
         re = ""
@@ -219,30 +240,6 @@ def judge(root):
             if cre != None and cre not in "[]}{)(\"'":
                 re = cre
         return re
-
-
-"""
-输出处理
-可处理语句：printf(a,b) 该语法：在括号内只能传入变量参数
-"""
-def out(root):
-    if root == None:
-        return
-    elif root.type == "V":
-        if len(root.child) <= 1:
-            mid_result.append(MNode("print", '-1', '-1', '-1'))
-            return
-        else:
-            name = [math_op(root.child[1])]
-            V = root.child[2]
-            while len(V.child) > 1:
-                name.append(math_op(V.child[1]))
-                V = V.child[2]
-            name.extend(['-1','-1','-1'])
-            mid_result.append(MNode("print", name[0], name[1], name[2]))
-    else:
-        for c in root.child:
-            out(c)
 
 def creat_mcode(filename):
     global tmp
@@ -260,7 +257,7 @@ def creat_mcode(filename):
     return {"name_list":w_list.para_list, "mid_code":mid_result, "tmp":tmp, "strings":string_list, "arrs":arr}
         
 if __name__ == "__main__":
-    filename = 'test/judge.c'
+    filename = 'test/while.c'
     creat_mcode(filename)
     for r in mid_result:
         print(r)

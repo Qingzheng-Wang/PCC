@@ -30,7 +30,7 @@ pcc -g                  查看本编译器的语法推导
 exit                    退出
 ```
 
-![](./other/help.png)
+![](util/help.png)
 
 ### 编译代码
 
@@ -121,7 +121,7 @@ while(i < 10){
 
 #### 举个栗子（打印99乘法表）
 
-![](./other/99mul.png)
+![](util/99mul.png)
 
 **源demo**
 ```c
@@ -144,7 +144,7 @@ int main(){
 
 #### 举个栗子（打印斐波那契数列）
 
-![](./other/pcc-o.png)
+![](util/pcc-o.png)
 
 **ｃ语言源码**
 

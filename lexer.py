@@ -1,31 +1,40 @@
-import re
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- #
+# ========================================================
+# 名称:   lexer.py
+# 作者:   Qingzheng WANG
+# 时间:   2023/5/19
+# 描述:   词法分析器，创建单词表(word_list)和参数表(para_list)
+# ========================================================
+
 # 一些判断函数和字符分割函数放在同级文件function.py中
 import sys, os
 sys.path.append(os.pardir)  # 为了导入父目录的文件而进行的设定
-from other.function import if_num, if_para, have_para, print_str, get_word, print_para
+from util.function import if_num, if_para, have_para, print_str, get_word, print_para
 
 # 运算符表
-op_list = {"+", "-", "*", "/", "<", "<=", ">", ">=", "=", "==", "!=", "^", ",", "&", "&&", "|", "||", "%", "~", "<<", ">>", "!"}
+op_list = {"+", "-", "*", "/", "<", "<=", ">", ">=", "=", "==", "!=", ",", "!"}
 # 分隔符表
 sp_list = {";", "(", ")", "[", "]", "{", "}", ".", ":", "\"", "#", "\'", "\\", "?"}
 # 关键字表
 k_list = {
-    "auto", "break", "case", "const", "continue","default", "do",  "else", "enum", "extern",
-    "for", "goto", "if", "register", "return", "short", "signed", "sizeof", "static",
-    "struct", "switch", "typedef", "union",  "volatile", "while", "printf"
+    "if", "return", "while"
 }
-
+# 比较运算符
 Cmp = ["<", ">", "==", "!=", ">=", "<="]
-
-Type = {"int","float","char","double","void","long","unsigned","string"}
+# 数据类型
+Type = {"int", "char", "void", "long", "unsigned", "string"}
 type_flag = ""
+
 # 括号配对判断
 kuo_cp = {'{':'}', '[':']', '(':')'}
 
-# 词法分析器输出对象
-# 成员变量：输出的单词表，源代码中的分隔符表,运算符表,变量表,关键字表
-# 一个方法，将源代码字符切割并存入对应表中
-# 对象创建实例需要传入filename参数，默认为test.c
+"""
+词法分析器输出对象
+成员变量：输出的单词表，源代码中的分隔符表,运算符表,变量表,关键字表
+一个方法，将源代码字符切割并存入对应表中
+对象创建实例需要传入filename参数，默认为test.c
+"""
 class word_list():
     def __init__(self, filename='test.c'):
         self.word_list = []          # 输出单词列表

@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- #
+# ========================================================
+# 名称:   get_predict_table.py
+# 作者:   Qingzheng WANG
+# 时间:   2023/5/20
+# 描述:   生成预测分析表，计算非终结符的first集和follow集
+# ========================================================
+
 # 使用自上而下的语法分析
 import sys, os, re
 sys.path.append(os.pardir)
@@ -25,11 +34,6 @@ grammars = {
     "F":["number", "BRA", "M MS"],
     "MS":["Size", "null"],
     "BRA": ["( E )"],
-
-    "OUT":["( TXT V )"],
-    "TXT":['string'],
-    "V":[", E VV", "null"],
-    "VV":[", E VV", "null"],
 
     "Pan":["Ptype P_block Pro"],
     "Ptype":["if", "while"],

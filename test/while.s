@@ -1,7 +1,6 @@
 	.text
 	.section	.rodata
-.LC0:
-	.string "Helloworld!"
+	.comm	T0,4,4
 	.text
 	.globl	main
 	.type	main, @function
@@ -14,10 +13,21 @@ main:
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
 	subq	$12, %rsp
-	movl	%eax, %esi
-	leaq	.LC0(%rip), %rdi
-	movl	$0, %eax
-	call	printf@PLT
+	movl	$0, -4(%rbp)
+.W1:
+	movl	-4(%rbp), %eax
+	cmpl	$10, %eax
+	jle	.begin3
+	jmp	.end3
+.begin3:
+	movl	-4(%rbp), %edx
+	movl	$1, %eax
+	addl	%edx, %eax
+	movl	%eax, T0(%rip)
+	movl	T0(%rip), %ecx
+	movl	%ecx, -4(%rbp)
+	jmp	.W1
+.end3:
 
 	movl	$0, %eax
 	leave

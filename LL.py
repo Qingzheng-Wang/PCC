@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*- #
+# ========================================================
+# 名称:   LL.py
+# 作者:   Qingzheng WANG
+# 时间:   2023/5/21
+# 描述:   使用LL分析法生成语法树
+# ========================================================
+
 from get_predict_table import create_predict_table
 from lexer import word_list
 
@@ -87,7 +96,7 @@ def analysis(word_table, show=False):
                 return [False]
 
 if __name__ == "__main__":
-    w_list = word_list("./test/test.c")
+    w_list = word_list("./test/array.c")
     word_table = w_list.word_list
     root = analysis(word_table, True)
     if root[0]:
