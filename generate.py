@@ -73,7 +73,7 @@ def view_astree(root, ft=None):
 def math_op(root, ft=None):
     if root == None:
         return
-    elif len(root.child) == 0 and root.text != None:
+    elif len(root.child) == 0 and root.text != None: # 对于非终结符则直接返回
         return root.text
     global mid_result
     global tmp
@@ -89,7 +89,7 @@ def math_op(root, ft=None):
         c1 = root.child[1] # c1是LM
         if len(c1.child) == 1: # 此时c1.child是null LM -> null
             mid_result.append(MNode("=", 0, 0, math_op(root.child[0].child[0]))) # root.child[0].child[0]是parameter，此时是声明语句，不赋值
-        elif c1.child[0].type == "=": # LM -> = FE
+        elif c1.child[0].type == "=": # LM -> = FE，遇到等号，就可以判断这是一个简单赋值语句，先生成四元式，然后四元式里的内容再递归处理
             mid_result.append(MNode("=", math_op(c1), 0, math_op(root.child[0].child[0])))
         else: # LM -> Size AM
             if len(c1.child[1].child) >1: # AM -> = E，该情况是数组赋值，类似s[1] = 1 + 2, 2
@@ -123,10 +123,10 @@ def math_op(root, ft=None):
         如果存在右递归，进行四则运算的解析
         不存在右递归的话直接赋值
         """
-        if len(root.child[1].child) > 1:
-            op = math_op(root.child[1].child[0])
-            arg1 = math_op(root.child[0])
-            arg2 = math_op(root.child[1].child[1])
+        if len(root.child[1].child) > 1: # 说明等号后有运算式，E下是加减运算式，例如int i = 1 + 2，T下是乘除运算式
+            op = math_op(root.child[1].child[0]) # 这里递归遇到终结符（+ - * /）直接就返回符号
+            arg1 = math_op(root.child[0]) # 计算参数1
+            arg2 = math_op(root.child[1].child[1]) # 计算参数2
             """静态的计算提前算好"""
             if if_num(arg1) and if_num(arg2):
                 return str(operator[op](int(arg1), int(arg2)))
@@ -147,7 +147,7 @@ def math_op(root, ft=None):
         else:
             return c[0].child[0].text
 
-    else:
+    else: # LM, FE
         re = ""
         for c in root.child:
             cre = math_op(c)
@@ -185,9 +185,9 @@ def judge(root):
         2. (E1 cmp E2)
         """
         Pm = root.child[1].child
-        if len(Pm) == 1:
+        if len(Pm) == 1: # 此时括号里面就是一个数，如果这个数等于1，就跳转到下一条指令，下一条指令即是if条件满足时执行的操作
             mid_result.append(MNode("j=", 1, math_op(root.child[0]), "code" + str(len(mid_result) + 1)))
-        else:
+        else: # PM -> Cmp E 否则就递归计算两个参数
             mid_result.append(MNode("j" + judge(Pm[0]), math_op(root.child[0]), math_op(Pm[1]), "code" + str(len(mid_result) + 1)))
         return
     if root.type == "Pro":
@@ -254,13 +254,13 @@ def creat_mcode(filename):
     w_list = word_list(filename)
     word_table = w_list.word_list
     string_list = w_list.string_list
-    root = analysis(word_table)[1]
+    root = analysis(word_table)[1] # 生成语法树
     view_astree(root)
 
     return {"name_list":w_list.para_list, "mid_code":mid_result, "tmp":tmp, "strings":string_list, "arrs":arr}
         
 if __name__ == "__main__":
-    filename = 'test/test.c'
+    filename = 'test/judge.c'
     creat_mcode(filename)
     for r in mid_result:
         print(r)
