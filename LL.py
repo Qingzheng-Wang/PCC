@@ -92,11 +92,11 @@ def analysis(word_table, show=False):
                     stack.append(nl)
             # 状态 4 错误
             else:
-                print("Error in", stack, cur.type , word_table[index]['type'])
-                return [False]
+                error_info = "Error in" + str(stack) + str(cur.type) + str(word_table[index]['type'])
+                return [False, error_info]
 
 if __name__ == "__main__":
-    w_list = word_list("./test/array.c")
+    w_list = word_list("./test/test.c")
     word_table = w_list.word_list
     root = analysis(word_table, True)
     if root[0]:

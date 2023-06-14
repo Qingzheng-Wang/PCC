@@ -24,8 +24,8 @@ Cmp = ["<", ">", "==", "!=", ">=", "<="]
 
 # 正则表达式判断是否为数字
 def if_num(int_word):
-    # 前半部分代表和类似3.14这样的小数匹配，后半部分代表和整数匹配
-    if re.match("^([0-9]+[.][0-9]*)$", int_word) or re.match("^([0-9]+)$", int_word) is None:
+    # 仅支持整数
+    if re.match("^([0-9]+)$", int_word) is None:
         return False
     else:
         return True
@@ -60,6 +60,7 @@ def print_str(lists):
             temp.append("None")
             table.append(temp)
     print(tabulate.tabulate(table, headers='firstrow'))
+    return tabulate.tabulate(table, headers='firstrow') # 返回的类型是str
 
 def print_para(lists):
     table = [['line', 'id', 'value', 'para', 'type']]
@@ -67,6 +68,14 @@ def print_para(lists):
         temp = [i[1] for i in l.items()]
         table.append(temp)
     print(tabulate.tabulate(table, headers='firstrow'))
+    return tabulate.tabulate(table, headers='firstrow') # 返回的类型是str
+
+def print_mid_code(lists):
+    txt = ""
+    for l in lists:
+        print(l)
+        txt += str(l) + "\n"
+    return txt
 
 # 分割并获取文本单词
 # 返回值为列表out_words

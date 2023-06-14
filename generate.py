@@ -249,15 +249,19 @@ def creat_mcode(filename):
     tmp = 0
     mid_result = []
     w_list = word_list(filename)
+    if not w_list.flag:
+        return {"error_info": w_list.error_info}
     word_table = w_list.word_list
-    string_list = w_list.string_list
-    root = analysis(word_table)[1] # 生成语法树
+    t = analysis(word_table)
+    if not t[0]:
+        return {"error_info": t[1]}
+    root = t[1] # 生成语法树
     view_astree(root)
 
-    return {"name_list":w_list.para_list, "mid_code":mid_result, "tmp":tmp, "strings":string_list, "arrs":arr}
+    return {"name_list":w_list.para_list, "mid_code":mid_result, "tmp":tmp, "strings":w_list.word_list, "arrs":arr}
         
 if __name__ == "__main__":
-    filename = 'test/while.c'
+    filename = 'test/test.c'
     creat_mcode(filename)
     for r in mid_result:
         print(r)

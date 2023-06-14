@@ -43,6 +43,7 @@ class word_list():
         self.para_list = []          # 变量
         self.key_word_table = []     # 关键字
         self.string_list = []
+        self.error_info = ""
         self.flag = True             # 源代码是否正确标识
         
         # get_word函数将源代码切割
@@ -111,7 +112,7 @@ class word_list():
                     elif w == kuo_cp[kuo_list[-1]['kuo']]:
                         kuo_list.pop()
                     else:
-                        print("Error in line " + str(line) + ": missing bracket.")
+                        self.error_info = "Error in line " + str(line) + ": missing bracket."
                         self.flag = False
                         return
                 self.separator_list.append({'line':line, 'type':w, 'word':w})
@@ -129,11 +130,11 @@ class word_list():
                         self.word_list.append({'line':line, 'type':'parameter', 'word':w, 'id':para_id})
                         para_id += 1
                 else:
-                    print("Error in line " + str(line) + ": " + w + " cannot be recognized.")
+                    self.error_info = "Error in line " + str(line) + ": " + w + " cannot be recognized."
                     self.flag = False
                     return
         if kuo_list: # 当kuo_list不为空时
-            print("Error in line" + str(kuo_list[0]['line']) + ": " + kuo_list[0]['kuo'] + " cannot be matched.")
+            self.error_info = "Error in line" + str(kuo_list[0]['line']) + ": " + kuo_list[0]['kuo'] + " cannot be matched."
             self.flag = False
             return
  

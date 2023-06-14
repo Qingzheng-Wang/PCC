@@ -1,3 +1,3 @@
 int main(){
-int i = 1;
+int p = 1;
 }

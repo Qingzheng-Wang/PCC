@@ -10,7 +10,6 @@
 # 使用自上而下的语法分析
 import sys, os, re
 sys.path.append(os.pardir)
-from lexer import word_list,k_list
 
 grammars = {
     "Program":["type M C Pro"],
